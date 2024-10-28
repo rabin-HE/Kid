@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Calculation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .calculation {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Random Calculation</h1>
+    <label>
+        <input type="checkbox" id="showAnswers" onclick="toggleAnswers()"> Show Answers
+    </label>
+    <button onclick="generateCalculations()">Generate 480 Calculations</button>
+    <div class="result" id="result"></div>
+
+    <script>
+        let calculations = [];
+
+        function generateCalculations() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = ''; // Clear previous results
+            calculations = []; // Reset calculations array
+
+            for (let i = 0; i < 480; i++) {
+                const num1 = Math.floor(Math.random() * 900) + 100;
+                const num2 = Math.floor(Math.random() * 900) + 100;
+                const num3 = Math.floor(Math.random() * 900) + 100;
+                const operations = ['+', '-'];
+                let result;
+                let expression = `${num1}`;
+
+                // Randomly choose operations and calculate
+                for (let j = 0; j < 2; j++) {
+                    const operation = operations[Math.floor(Math.random() * operations.length)];
+                    if (operation === '+') {
+                        result = (result || num1) + (j === 0 ? num2 : num3);
+                        expression += ` + ${(j === 0 ? num2 : num3)}`;
+                    } else {
+                        result = (result || num1) - (j === 0 ? num2 : num3);
+                        expression += ` - ${(j === 0 ? num2 : num3)}`;
+                    }
+                }
+
+                // Ensure the result is not negative
+                if (result < 0) {
+                    result = Math.abs(result);
+                    expression = expression.replace('-', '+');
+                }
+
+                calculations.push({ expression, result });
+                const calculationDiv = document.createElement('div');
+                calculationDiv.className = 'calculation';
+                calculationDiv.innerText = expression;
+                resultDiv.appendChild(calculationDiv);
+            }
+        }
+
+        function toggleAnswers() {
+            const showAnswers = document.getElementById('showAnswers').checked;
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = ''; // Clear previous results
+
+            calculations.forEach(calc => {
+                const calculationDiv = document.createElement('div');
+                calculationDiv.className = 'calculation';
+                calculationDiv.innerText = showAnswers ? `${calc.expression} = ${calc.result}` : calc.expression;
+                resultDiv.appendChild(calculationDiv);
+            });
+        }
+    </script>
+</body>
+</html>

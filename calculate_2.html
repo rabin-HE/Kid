@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>百位加减法生成器</title>
+  <style>
+    .problem-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .problem-item {
+      border: 1px solid #ccc;
+      padding: 5px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>百位加减法生成器</h1>
+  <form id="problemForm">
+    <button type="button" onclick="generateProblems()">生成题目</button>
+    <label>
+      <input type="checkbox" id="showAnswers"> 显示答案
+    </label>
+    <label>
+      列数:
+      <input type="number" id="numColumns" value="3" min="1" max="10">
+    </label>
+    <button type="submit">提交</button>
+  </form>
+  <div class="problem-list" id="problemList"></div>
+
+  <script>
+    let problems = [];
+
+    function generateProblems() {
+      problems = [];
+      for (let i = 0; i < 381; i++) {
+        let num1 = Math.floor(Math.random() * 900) + 100;
+        let num2 = Math.floor(Math.random() * 900) + 100;
+        const operation = Math.random() > 0.5 ? '+' : '-';
+        let answer;
+        
+        if (operation === '+') {
+          answer = num1 + num2;
+        } else {
+          if (num1 < num2) [num1, num2] = [num2, num1];
+          answer = num1 - num2;
+        }
+        
+        problems.push({ num1, operation, num2, answer });
+      }
+      renderProblems();
+    }
+
+    function renderProblems() {
+      const problemList = document.getElementById('problemList');
+      const showAnswers = document.getElementById('showAnswers').checked;
+      const numColumns = parseInt(document.getElementById('numColumns').value, 10);
+
+      problemList.style.gridTemplateColumns = `repeat(${numColumns}, 1fr)`;
+      problemList.innerHTML = problems.map(({ num1, operation, num2, answer }) =>
+        `<div class="problem-item">${num1} ${operation} ${num2} = ${showAnswers ? answer : ''}</div>`
+      ).join('');
+    }
+
+    document.getElementById('problemForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      renderProblems();
+    });
+  </script>
+</body>
+</html>

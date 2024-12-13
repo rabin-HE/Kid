@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kid's Scoreboard</title>
+    <style>
+      .stars {
+        font-size: 2em;
+        white-space: pre-wrap; /* Allows stars to wrap to the next line */
+        word-wrap: break-word; /* Ensures wrapping occurs */
+      }
+      .log {
+        margin-top: 20px;
+      }
+      .star-panel {
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Kid's Scoreboard</h1>
+    <div class="star-panel">
+      <label>Select Stars:</label>
+      <div>
+        <input
+          type="radio"
+          name="starCount"
+          value="1"
+          onclick="selectStars(1)"
+        />
+        1
+        <input
+          type="radio"
+          name="starCount"
+          value="2"
+          onclick="selectStars(2)"
+        />
+        2
+        <input
+          type="radio"
+          name="starCount"
+          value="3"
+          onclick="selectStars(3)"
+        />
+        3
+        <input
+          type="radio"
+          name="starCount"
+          value="4"
+          onclick="selectStars(4)"
+        />
+        4
+        <input
+          type="radio"
+          name="starCount"
+          value="5"
+          onclick="selectStars(5)"
+        />
+        5
+        <input
+          type="radio"
+          name="starCount"
+          value="6"
+          onclick="selectStars(6)"
+        />
+        6
+        <input
+          type="radio"
+          name="starCount"
+          value="7"
+          onclick="selectStars(7)"
+        />
+        7
+        <input
+          type="radio"
+          name="starCount"
+          value="8"
+          onclick="selectStars(8)"
+        />
+        8
+        <input
+          type="radio"
+          name="starCount"
+          value="9"
+          onclick="selectStars(9)"
+        />
+        9
+      </div>
+    </div>
+    <div id="starDisplay" class="stars"></div>
+    <div>
+      <label for="remarks">Remarks:</label>
+      <textarea id="remarks" rows="3" cols="30"></textarea>
+    </div>
+    <button onclick="addStars()">Add Stars</button>
+    <button onclick="removeStars()">Remove Stars</button>
+    <div class="log" id="log"></div>
+    <div class="current-stars" id="currentStars">Current Stars: 5</div>
+    <div id="allStars" class="stars"></div>
+
+    <script>
+      let currentStarCount = 5;
+      let logs = [];
+
+      function selectStars(count) {
+        document.getElementById("starDisplay").textContent = "⭐".repeat(count);
+      }
+
+      function addStars() {
+        const starDisplay = document.getElementById("starDisplay");
+        const remarks = document.getElementById("remarks").value;
+
+        const newStars = starDisplay.textContent.length;
+        currentStarCount += newStars;
+        updateCurrentStars();
+
+        const date = new Date();
+        const logEntry = `Added ${newStars} star(s) on ${date.toLocaleString()}. Remarks: ${remarks}`;
+        logs.unshift(logEntry);
+        if (logs.length > 100) logs.pop();
+        updateLogDisplay();
+        saveState();
+      }
+
+      function removeStars() {
+        const starDisplay = document.getElementById("starDisplay");
+        const remarks = document.getElementById("remarks").value;
+
+        const newStars = starDisplay.textContent.length;
+        currentStarCount = Math.max(0, currentStarCount - newStars);
+        updateCurrentStars();
+
+        const date = new Date();
+        const logEntry = `Removed ${newStars} star(s) on ${date.toLocaleString()}. Remarks: ${remarks}`;
+        logs.unshift(logEntry);
+        if (logs.length > 100) logs.pop();
+        updateLogDisplay();
+        saveState();
+      }
+
+      function updateCurrentStars() {
+        document.getElementById(
+          "currentStars"
+        ).textContent = `Current Stars: ${currentStarCount}`;
+        document.getElementById("allStars").textContent = "⭐".repeat(
+          currentStarCount
+        );
+      }
+
+      function updateLogDisplay() {
+        const log = document.getElementById("log");
+        log.innerHTML = logs
+          .slice(0, 5)
+          .map((entry) => `<p>${entry}</p>`)
+          .join("");
+      }
+
+      function saveState() {
+        fetch("/update", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ currentStarCount, logs }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (!data.success) {
+              console.error("Failed to update data");
+            }
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      function fetchData() {
+        fetch("/data")
+          .then((response) => response.json())
+          .then((data) => {
+            currentStarCount = data.currentStarCount;
+            logs = data.logs;
+            updateCurrentStars();
+            updateLogDisplay();
+          })
+          .catch((error) => console.error("Error fetching data:", error));
+      }
+
+      // Initialize display on page load
+      fetchData();
+    </script>
+  </body>
+</html>
